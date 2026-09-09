@@ -1,0 +1,36 @@
+{
+  "name": "nifty-trading-backend",
+  "version": "1.0.0",
+  "description": "Backend for Nifty 50 Paper Trading App",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest --detectOpenHandles",
+    "seed": "node scripts/seed.js"
+  },
+  "keywords": [
+    "trading",
+    "nifty50",
+    "paper-trading"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.27.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "express-validator": "^6.14.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongodb": "^6.21.0",
+    "mongoose": "^6.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
+  }
+}
