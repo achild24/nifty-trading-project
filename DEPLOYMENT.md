@@ -31,6 +31,30 @@ This repository contains a React frontend and a separate Express/MongoDB backend
 
 Do not put `MONGODB_URI` or `JWT_SECRET` in the frontend Vercel environment variables. They belong only to the backend deployment. If the MongoDB credentials previously used in local development were real credentials, rotate them before production deployment.
 
+## Render Backend Deployment
+
+The repository includes `render.yaml` for the backend Web Service.
+
+1. Push the latest changes to GitHub.
+2. In Render, choose **New > Blueprint** and select the repository.
+3. Render will detect `render.yaml`, use `backend` as the service root, run `npm ci`, and start the service with `npm start`.
+4. Set these prompted secret values:
+
+  ```text
+  MONGODB_URI=mongodb+srv://...
+  JWT_SECRET=your-long-random-production-secret
+  FRONTEND_URL=https://your-frontend-domain.vercel.app
+  ```
+
+5. After deployment, test `https://your-render-service.onrender.com/api/health`.
+6. Update the Vercel variable `REACT_APP_API_URL` to:
+
+  ```text
+  https://your-render-service.onrender.com/api
+  ```
+
+Render supplies the `PORT` variable automatically. Do not commit `.env` files or production secrets.
+
 ## Prerequisites
 
 - Node.js 18+
