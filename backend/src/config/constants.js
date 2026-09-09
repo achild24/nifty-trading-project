@@ -1,4 +1,4 @@
-export const STARTING_BALANCE = 1000000;
+export const STARTING_BALANCE = 100000;
 
 export const STOCKS = [
   { symbol: 'RELIANCE', name: 'Reliance Industries', price: 2865.25 },
