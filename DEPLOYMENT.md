@@ -1,5 +1,36 @@
 # Production Deployment Guide
 
+## Vercel Frontend Deployment
+
+This repository contains a React frontend and a separate Express/MongoDB backend. Deploy the React frontend to Vercel, then host the backend on a Node-compatible service such as Render, Railway, Fly.io, or a separate Vercel serverless project.
+
+1. Push the repository to GitHub and import it into Vercel.
+2. Keep the Vercel project root at the repository root.
+3. In Vercel project settings, add this environment variable:
+
+  ```text
+  REACT_APP_API_URL=https://your-backend-domain.example.com/api
+  ```
+
+4. Deploy with the existing `vercel.json` configuration.
+5. In the backend host, configure:
+
+  ```text
+  FRONTEND_URL=https://your-frontend-domain.vercel.app
+  MONGODB_URI=your-production-mongodb-connection-string
+  JWT_SECRET=your-long-random-production-secret
+  JWT_EXPIRE=7d
+  PORT=5000
+  ```
+
+6. Verify the backend before testing the frontend:
+
+  ```text
+  https://your-backend-domain.example.com/api/health
+  ```
+
+Do not put `MONGODB_URI` or `JWT_SECRET` in the frontend Vercel environment variables. They belong only to the backend deployment. If the MongoDB credentials previously used in local development were real credentials, rotate them before production deployment.
+
 ## Prerequisites
 
 - Node.js 18+
