@@ -3,7 +3,7 @@ import { tradeAPI } from '../../services/api.js';
 import { useAuth } from '../../hooks/useAuth.js';
 
 export const Trade = () => {
-  const { updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const [stocks, setStocks] = useState([]);
   const [selectedSymbol, setSelectedSymbol] = useState('');
   const [quantity, setQuantity] = useState(1);
@@ -47,6 +47,13 @@ export const Trade = () => {
     setMessage('');
     const tradeQuantity = Math.max(1, parseInt(quantity, 10) || 1);
     setQuantity(tradeQuantity);
+    if (type === 'BUY' && stock && tradeQuantity * stock.price > Number(user?.balance || 0)) {
+      const insufficientMessage = 'Insufficient balance for this order';
+      setError(insufficientMessage);
+      setToast({ type: 'error', text: insufficientMessage });
+      window.setTimeout(() => setToast(null), 4500);
+      return;
+    }
     try {
       const response = type === 'BUY'
         ? await tradeAPI.buyStock(selectedSymbol, tradeQuantity)
@@ -71,12 +78,12 @@ export const Trade = () => {
       {!stock && error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
       <div className="relative mt-6 min-h-[360px] overflow-hidden max-sm:overflow-visible">
-      <div className={`overflow-x-auto transition-all duration-300 ${stock ? 'lg:pr-[320px]' : ''}`}>
+      <div className={`overflow-hidden transition-all duration-300 ${stock ? 'lg:pr-[320px]' : ''}`}>
         <div className="mb-3 flex items-center justify-between">
           <h4 className="font-semibold text-slate-800">Market data</h4>
           <button type="button" onClick={loadStocks} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">Refresh prices</button>
         </div>
-        <table className="hidden w-full min-w-[520px] text-left text-sm sm:table">
+        <table className="hidden w-full table-fixed text-left text-sm sm:table">
           <thead className="border-b border-slate-200 text-slate-500">
             <tr><th className="px-3 py-2">Symbol</th><th className="px-3 py-2">Company</th><th className="px-3 py-2">Price</th><th className="px-3 py-2">Change</th></tr>
           </thead>

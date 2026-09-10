@@ -44,7 +44,12 @@ export const buyStock = async (req, res, next) => {
     const stock = await findStock(symbol);
     if (!stock) return res.status(404).json({ success: false, message: 'Stock not found' });
     const total = stock.price * quantity;
-    if (req.user.balance < total) return res.status(400).json({ success: false, message: 'Insufficient balance' });
+    if (!Number.isInteger(quantity) || quantity < 1 || !Number.isFinite(total) || total <= 0) {
+      return res.status(400).json({ success: false, message: 'Quantity must be a valid positive integer' });
+    }
+    if (!Number.isFinite(req.user.balance) || req.user.balance < total) {
+      return res.status(400).json({ success: false, message: 'Insufficient balance for this order' });
+    }
     const position = req.user.portfolio.find((item) => item.symbol === symbol);
     if (position) {
       position.avgPrice = ((position.avgPrice * position.quantity) + total) / (position.quantity + quantity);
@@ -67,6 +72,7 @@ export const sellStock = async (req, res, next) => {
     const stock = await findStock(symbol);
     const position = req.user.portfolio.find((item) => item.symbol === symbol);
     if (!stock || !position) return res.status(400).json({ success: false, message: 'You do not own this stock' });
+    if (!Number.isInteger(quantity) || quantity < 1) return res.status(400).json({ success: false, message: 'Quantity must be a valid positive integer' });
     if (position.quantity < quantity) return res.status(400).json({ success: false, message: 'Insufficient shares to sell' });
     const total = stock.price * quantity;
     const realizedPnL = (stock.price - position.avgPrice) * quantity;
