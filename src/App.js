@@ -6,6 +6,7 @@ import { Header } from './components/Header.js';
 import { Login, Register } from './components/Auth/index.js';
 import { Trade } from './components/Trade/index.js';
 import { Portfolio } from './components/Portfolio/index.js';
+import { Account } from './components/Account/index.js';
 import { tradeAPI } from './services/api.js';
 
 function AppContent() {
@@ -133,12 +134,13 @@ function AppContent() {
         {/* Tab Content */}
         {activeTab === 'trade' && <Trade />}
         {activeTab === 'portfolio' && <Portfolio />}
+        {activeTab === 'account' && <Account user={user} onLogout={handleLogout} />}
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-3 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden" aria-label="Mobile navigation">
-        <button type="button" onClick={() => setActiveTab('trade')} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold ${activeTab === 'trade' ? 'text-indigo-600' : 'text-slate-500'}`}><Home size={20} />Account</button>
+        <button type="button" onClick={() => setActiveTab('trade')} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold ${activeTab === 'trade' ? 'text-indigo-600' : 'text-slate-500'}`}><Home size={20} />Home</button>
         <button type="button" onClick={() => setActiveTab('portfolio')} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold ${activeTab === 'portfolio' ? 'text-indigo-600' : 'text-slate-500'}`}><Briefcase size={20} />Portfolio</button>
-        <button type="button" onClick={() => setActiveTab('portfolio')} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold ${activeTab === 'portfolio' ? 'text-indigo-600' : 'text-slate-500'}`}><User size={20} />Holdings</button>
+        <button type="button" onClick={() => setActiveTab('account')} className={`flex min-h-16 flex-col items-center justify-center gap-1 text-xs font-semibold ${activeTab === 'account' ? 'text-indigo-600' : 'text-slate-500'}`}><User size={20} />Account</button>
       </nav>
     </div>
   );

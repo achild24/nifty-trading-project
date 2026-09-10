@@ -3,7 +3,7 @@ import { useAuth } from '../../hooks/useAuth.js';
 import { tradeAPI } from '../../services/api.js';
 
 export const Portfolio = () => {
-  const { user, updateUser } = useAuth();
+  const { updateUser } = useAuth();
   const [portfolio, setPortfolio] = useState([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -43,8 +43,8 @@ export const Portfolio = () => {
       <h3 className="text-2xl font-bold text-slate-800 mb-4">Portfolio</h3>
       <div className="grid md:grid-cols-3 gap-4">
         <div className="rounded-xl bg-slate-50 p-4">
-          <p className="text-sm text-slate-500">Available Cash</p>
-          <p className="text-2xl font-bold text-slate-800">₹{Number(user?.balance || 0).toLocaleString()}</p>
+          <p className="text-sm text-slate-500">Holding Value</p>
+          <p className="text-2xl font-bold text-slate-800">₹{portfolioValue.toLocaleString()}</p>
         </div>
         <div className="rounded-xl bg-slate-50 p-4">
           <p className="text-sm text-slate-500">Holdings</p>
@@ -60,14 +60,9 @@ export const Portfolio = () => {
         <button type="button" onClick={loadPortfolio} className="text-sm font-semibold text-indigo-600 hover:text-indigo-700">Refresh portfolio</button>
       </div>
       {error && <p className="mt-6 text-sm text-red-600">{error}</p>}
-      <div className="mt-6 space-y-3">
+      <div className="mt-6 overflow-x-auto">
         {portfolio.length === 0 && !error && <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">No open positions.</p>}
-        {portfolio.map((position) => (
-          <div key={position.symbol} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-4">
-            <div><p className="font-semibold text-slate-800">{position.symbol}</p><p className="text-sm text-slate-500">{position.quantity} shares at ₹{position.avgPrice.toLocaleString()}</p></div>
-            <div className="flex items-center gap-4"><div className="text-right"><p className="text-sm text-slate-500">Value ₹{(position.currentPrice * position.quantity).toLocaleString()}</p><p className={position.pnl >= 0 ? 'font-semibold text-emerald-600' : 'font-semibold text-red-600'}>P&L ₹{position.pnl.toLocaleString()}</p></div><button type="button" onClick={() => handleSellAll(position)} className="rounded-lg bg-red-50 px-3 py-2 text-sm font-semibold text-red-600 hover:bg-red-100">Sell all</button></div>
-          </div>
-        ))}
+        {portfolio.length > 0 && <table className="w-full min-w-[620px] text-left text-sm"><thead className="border-b border-slate-200 text-slate-500"><tr><th className="px-3 py-3">Company</th><th className="px-3 py-3">Quantity</th><th className="px-3 py-3">Avg. price</th><th className="px-3 py-3">Total value</th><th className="px-3 py-3">P&amp;L</th><th className="px-3 py-3">Action</th></tr></thead><tbody>{portfolio.map((position) => <tr key={position.symbol} className="border-b border-slate-100"><td className="px-3 py-3 font-semibold text-slate-800">{position.symbol}</td><td className="px-3 py-3">{position.quantity}</td><td className="px-3 py-3">₹{position.avgPrice.toLocaleString()}</td><td className="px-3 py-3">₹{(position.currentPrice * position.quantity).toLocaleString()}</td><td className={`px-3 py-3 font-semibold ${position.pnl >= 0 ? 'text-emerald-600' : 'text-red-600'}`}>₹{position.pnl.toLocaleString()}</td><td className="px-3 py-3"><button type="button" onClick={() => handleSellAll(position)} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-100">Sell all</button></td></tr>)}</tbody></table>}
       </div>
     </div>
   );
