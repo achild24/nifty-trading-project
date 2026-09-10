@@ -34,7 +34,7 @@ export const Header = ({ user, portfolioValue, totalPnL, onLogout, onNavigate })
                     <div className="flex items-center justify-between rounded-lg bg-blue-50 px-3 py-3"><span className="text-sm text-slate-600">Portfolio value</span><strong className="text-slate-900">₹{Number(portfolioValue || 0).toLocaleString()}</strong></div>
                     <div className={`flex items-center justify-between rounded-lg px-3 py-3 ${totalPnL >= 0 ? 'bg-emerald-50' : 'bg-red-50'}`}><span className="text-sm text-slate-600">Total P&amp;L</span><strong className={totalPnL >= 0 ? 'text-emerald-700' : 'text-red-700'}>₹{Number(totalPnL || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></div>
                   </div>
-                  <button type="button" onClick={onLogout} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50"><LogOut size={17} /> Logout</button>
+                  <button type="button" onClick={() => { setShowAccountMenu(false); onLogout(); }} className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-semibold text-red-600 hover:bg-red-50"><LogOut size={17} /> Logout</button>
                 </div>
               )}
               </div>

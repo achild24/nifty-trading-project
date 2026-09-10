@@ -36,7 +36,7 @@ const authReducer = (state, action) => {
     case 'AUTH_READY':
       return { ...state, isLoading: false };
     case 'LOGOUT':
-      return initialState;
+      return { ...initialState, isLoading: false };
     case 'UPDATE_USER':
       return { ...state, user: action.payload };
     default:
@@ -108,11 +108,6 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const logout = useCallback(async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch({ type: 'LOGOUT' });
