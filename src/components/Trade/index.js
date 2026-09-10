@@ -33,13 +33,13 @@ export const Trade = () => {
   }, []);
 
   useEffect(() => {
-    const closeOnMobileOutsideClick = (event) => {
-      if (window.matchMedia('(max-width: 639px)').matches && stock && orderPanelRef.current && !orderPanelRef.current.contains(event.target)) {
+    const closeOnOutsideClick = (event) => {
+      if (stock && orderPanelRef.current && !orderPanelRef.current.contains(event.target)) {
         setSelectedSymbol('');
       }
     };
-    document.addEventListener('mousedown', closeOnMobileOutsideClick);
-    return () => document.removeEventListener('mousedown', closeOnMobileOutsideClick);
+    document.addEventListener('mousedown', closeOnOutsideClick);
+    return () => document.removeEventListener('mousedown', closeOnOutsideClick);
   }, [stock]);
 
   const handleTrade = async (type) => {
@@ -68,7 +68,7 @@ export const Trade = () => {
 
       {!stock && error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
-      <div className="relative mt-6 min-h-[360px] overflow-hidden">
+      <div className="relative mt-6 min-h-[360px] overflow-hidden max-sm:overflow-visible">
       <div className={`overflow-x-auto transition-all duration-300 ${stock ? 'lg:pr-[320px]' : ''}`}>
         <div className="mb-3 flex items-center justify-between">
           <h4 className="font-semibold text-slate-800">Market data</h4>
@@ -93,7 +93,8 @@ export const Trade = () => {
         </div>
       </div>
 
-      <aside ref={orderPanelRef} className={`absolute right-0 top-0 z-10 h-full w-full max-w-[300px] rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-lg transition-transform duration-300 ease-out max-sm:static max-sm:mt-4 max-sm:h-auto max-sm:max-w-none max-sm:shadow-none max-sm:transition-none ${stock ? 'translate-x-0 max-sm:translate-x-0' : 'translate-x-[calc(100%+1rem)] max-sm:hidden'}`} aria-hidden={!stock}>
+      {stock && <button type="button" aria-label="Close order panel" onClick={() => setSelectedSymbol('')} className="fixed inset-0 z-30 hidden bg-slate-900/25 max-sm:block" />}
+      <aside ref={orderPanelRef} className={`absolute right-0 top-0 z-40 h-full w-full max-w-[300px] rounded-xl border border-slate-200 bg-slate-50 p-5 shadow-lg transition-transform duration-300 ease-out max-sm:fixed max-sm:bottom-0 max-sm:left-0 max-sm:right-0 max-sm:top-auto max-sm:h-auto max-sm:max-w-none max-sm:rounded-b-none max-sm:rounded-t-2xl max-sm:shadow-2xl max-sm:transition-transform ${stock ? 'translate-x-0 max-sm:translate-x-0 max-sm:translate-y-0' : 'translate-x-[calc(100%+1rem)] max-sm:translate-x-0 max-sm:translate-y-full'}`} aria-hidden={!stock}>
         <div className="flex items-center justify-between"><p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Order panel</p><button type="button" onClick={() => setSelectedSymbol('')} className="text-sm font-semibold text-slate-500 hover:text-slate-800">Close</button></div>
         {stock ? <><p className="mt-2 text-sm text-slate-500">Selected stock</p><h4 className="mt-1 text-2xl font-bold text-slate-800">{stock.symbol}</h4><p className="mt-1 text-lg font-semibold text-indigo-600">₹{stock.price.toLocaleString()}</p><label className="mt-5 block text-sm font-medium text-slate-700" htmlFor="trade-quantity">Quantity</label><input id="trade-quantity" type="number" min="1" value={quantity} onChange={(e) => setQuantity(Math.max(1, Number(e.target.value || 1)))} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2" /><div className="mt-3 flex items-center justify-between text-sm text-slate-500"><span>Estimated total</span><strong className="text-slate-800">₹{(stock.price * quantity).toLocaleString()}</strong></div><div className="mt-5 grid gap-2"><button type="button" onClick={() => handleTrade('BUY')} className="rounded-lg bg-emerald-600 px-4 py-2.5 font-semibold text-white hover:bg-emerald-700">Buy</button><button type="button" onClick={() => handleTrade('SELL')} className="rounded-lg bg-red-600 px-4 py-2.5 font-semibold text-white hover:bg-red-700">Sell</button></div></> : <p className="mt-3 text-sm leading-6 text-slate-500">Click a stock in the market table to open its buy and sell options.</p>}
       </aside>

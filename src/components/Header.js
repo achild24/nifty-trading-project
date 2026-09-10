@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, LogOut, Menu, User, X } from 'lucide-react';
+import { Activity, LogOut, User, X } from 'lucide-react';
 
 export const Header = ({ user, portfolioValue, totalPnL, onLogout, onNavigate }) => {
   const [showAccountMenu, setShowAccountMenu] = useState(false);
@@ -18,13 +18,13 @@ export const Header = ({ user, portfolioValue, totalPnL, onLogout, onNavigate })
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden rounded-lg bg-emerald-50 px-4 py-2 text-right sm:block">
+              <div className="rounded-lg bg-emerald-50 px-3 py-2 text-right sm:px-4">
                 <p className="text-xs text-slate-500">Balance</p>
                 <p className="font-bold text-emerald-700">₹{Number(user?.balance || 0).toLocaleString()}</p>
               </div>
               <div className="relative">
               <button type="button" onClick={() => setShowAccountMenu((visible) => !visible)} aria-label="Open My Account menu" className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
-                <span className="sm:hidden">{showAccountMenu ? <X size={22} /> : <User size={22} />}</span><span className="hidden sm:inline">{showAccountMenu ? <X size={20} /> : <Menu size={20} />} My Account</span>
+                {showAccountMenu ? <X size={20} /> : <User size={20} />}<span className="hidden sm:inline">My Account</span>
               </button>
               {showAccountMenu && (
                 <div className="absolute right-0 z-20 mt-3 w-72 rounded-xl border border-slate-200 bg-white p-3 shadow-xl">
