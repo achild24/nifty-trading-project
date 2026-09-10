@@ -15,6 +15,7 @@ function AppContent() {
   const [authMode, setAuthMode] = useState('login'); // 'login' or 'register'
   const [activeTab, setActiveTab] = useState('trade');
   const [portfolioValue, setPortfolioValue] = useState(0);
+  const [totalHoldingQuantity, setTotalHoldingQuantity] = useState(0);
   const [totalPnL, setTotalPnL] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -37,14 +38,17 @@ function AppContent() {
         const portfolio = response.portfolio || [];
 
         let pValue = 0;
+        let holdingQuantity = 0;
         let pnlUnrealized = 0;
 
         portfolio.forEach(position => {
           pValue += (position.currentPrice || position.avgPrice) * position.quantity;
+          holdingQuantity += position.quantity || 0;
           pnlUnrealized += position.pnl || 0;
         });
 
         setPortfolioValue(pValue);
+        setTotalHoldingQuantity(holdingQuantity);
         setTotalPnL((user?.totalPnL || 0) + pnlUnrealized);
       } catch (error) {
         console.error('Error calculating portfolio metrics:', error);
@@ -134,7 +138,7 @@ function AppContent() {
         {/* Tab Content */}
         {activeTab === 'trade' && <Trade />}
         {activeTab === 'portfolio' && <Portfolio />}
-        {activeTab === 'account' && <Account user={user} onLogout={handleLogout} />}
+        {activeTab === 'account' && <Account user={user} totalHoldingQuantity={totalHoldingQuantity} portfolioValue={portfolioValue} totalPnL={totalPnL} onLogout={handleLogout} />}
       </div>
 
       <nav className="fixed bottom-0 left-0 right-0 z-30 grid grid-cols-3 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_18px_rgba(15,23,42,0.08)] backdrop-blur sm:hidden" aria-label="Mobile navigation">
