@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true, minlength: 6, select: false },
   balance: { type: Number, default: STARTING_BALANCE, min: 0 },
+  marginUsed: { type: Number, default: 0, min: 0 },
   totalPnL: { type: Number, default: 0 },
   rewardPoints: { type: Number, default: 0 },
   trades: { type: Number, default: 0 },

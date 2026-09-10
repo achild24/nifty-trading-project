@@ -55,6 +55,7 @@ export const buyStock = async (req, res, next) => {
     if (position?.quantity < 0) {
       const coveredQuantity = Math.min(quantity, Math.abs(position.quantity));
       realizedPnL = (position.avgPrice - stock.price) * coveredQuantity;
+      req.user.marginUsed = Math.max(0, req.user.marginUsed - (position.avgPrice * coveredQuantity));
       position.quantity += coveredQuantity;
       if (position.quantity === 0) req.user.portfolio = req.user.portfolio.filter((item) => item.symbol !== symbol);
       const remainingQuantity = quantity - coveredQuantity;
@@ -85,25 +86,39 @@ export const sellStock = async (req, res, next) => {
     if (!Number.isInteger(quantity) || quantity < 1) return res.status(400).json({ success: false, message: 'Quantity must be a valid positive integer' });
     const total = stock.price * quantity;
     let realizedPnL = 0;
+    const wasLong = position?.quantity > 0;
+    const shortQuantity = !position
+      ? quantity
+      : wasLong
+        ? Math.max(0, quantity - position.quantity)
+        : quantity;
+    const availableMargin = Math.max(0, req.user.balance - (req.user.marginUsed || 0));
+    const marginRequired = stock.price * shortQuantity;
+    if (marginRequired > availableMargin) {
+      return res.status(400).json({ success: false, message: 'Insufficient margin for this short sell' });
+    }
     if (!position) {
-      req.user.portfolio.push({ symbol, quantity: -quantity, avgPrice: stock.price });
+      // Open a new short position below.
     } else if (position.quantity > 0) {
       const closedQuantity = Math.min(quantity, position.quantity);
       realizedPnL = (stock.price - position.avgPrice) * closedQuantity;
       position.quantity -= closedQuantity;
-      const shortQuantity = quantity - closedQuantity;
       if (position.quantity === 0) req.user.portfolio = req.user.portfolio.filter((item) => item.symbol !== symbol);
-      if (shortQuantity > 0) req.user.portfolio.push({ symbol, quantity: -shortQuantity, avgPrice: stock.price });
     } else {
       const existingShortQuantity = Math.abs(position.quantity);
       position.avgPrice = ((position.avgPrice * existingShortQuantity) + total) / (existingShortQuantity + quantity);
+      shortQuantity = quantity;
+    }
+    if (!position) req.user.portfolio.push({ symbol, quantity: -quantity, avgPrice: stock.price });
+    else if (wasLong && shortQuantity > 0) req.user.portfolio.push({ symbol, quantity: -shortQuantity, avgPrice: stock.price });
+    else if (position.quantity < 0) {
       position.quantity -= quantity;
     }
+    req.user.marginUsed = (req.user.marginUsed || 0) + marginRequired;
     req.user.balance += total;
     req.user.totalPnL += realizedPnL;
     req.user.trades += 1;
     if (realizedPnL > 0) req.user.winningTrades += 1;
-    req.user.totalPnL += realizedPnL;
     await req.user.save();
     await Trade.create({ user: req.user._id, symbol, type: 'SELL', quantity, price: stock.price, total, realizedPnL });
     res.json({ success: true, message: 'Stock sold successfully', user: req.user, trade: { symbol, quantity, price: stock.price, type: 'SELL', realizedPnL } });
