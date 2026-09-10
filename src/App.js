@@ -109,11 +109,12 @@ function AppContent() {
         portfolioValue={portfolioValue}
         totalPnL={totalPnL}
         onLogout={handleLogout}
+        onNavigate={setActiveTab}
       />
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex gap-2 mb-6">
+        <div className="hidden gap-2 mb-6 sm:flex">
           {['trade', 'portfolio'].map(tab => (
             <button
               key={tab}
