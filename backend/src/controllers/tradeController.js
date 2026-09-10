@@ -51,15 +51,25 @@ export const buyStock = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Insufficient balance for this order' });
     }
     const position = req.user.portfolio.find((item) => item.symbol === symbol);
-    if (position) {
+    let realizedPnL = 0;
+    if (position?.quantity < 0) {
+      const coveredQuantity = Math.min(quantity, Math.abs(position.quantity));
+      realizedPnL = (position.avgPrice - stock.price) * coveredQuantity;
+      position.quantity += coveredQuantity;
+      if (position.quantity === 0) req.user.portfolio = req.user.portfolio.filter((item) => item.symbol !== symbol);
+      const remainingQuantity = quantity - coveredQuantity;
+      if (remainingQuantity > 0) req.user.portfolio.push({ symbol, quantity: remainingQuantity, avgPrice: stock.price });
+    } else if (position) {
       position.avgPrice = ((position.avgPrice * position.quantity) + total) / (position.quantity + quantity);
       position.quantity += quantity;
     } else req.user.portfolio.push({ symbol, quantity, avgPrice: stock.price });
     req.user.balance -= total;
+    req.user.totalPnL += realizedPnL;
     req.user.trades += 1;
     req.user.rewardPoints += quantity;
+    if (realizedPnL > 0) req.user.winningTrades += 1;
     await req.user.save();
-    await Trade.create({ user: req.user._id, symbol, type: 'BUY', quantity, price: stock.price, total });
+    await Trade.create({ user: req.user._id, symbol, type: 'BUY', quantity, price: stock.price, total, realizedPnL });
     res.json({ success: true, message: 'Stock purchased successfully', user: req.user, trade: { symbol, quantity, price: stock.price, type: 'BUY' } });
   } catch (error) { next(error); }
 };
@@ -71,17 +81,29 @@ export const sellStock = async (req, res, next) => {
     const quantity = Number(req.body.quantity);
     const stock = await findStock(symbol);
     const position = req.user.portfolio.find((item) => item.symbol === symbol);
-    if (!stock || !position) return res.status(400).json({ success: false, message: 'You do not own this stock' });
+    if (!stock) return res.status(404).json({ success: false, message: 'Stock not found' });
     if (!Number.isInteger(quantity) || quantity < 1) return res.status(400).json({ success: false, message: 'Quantity must be a valid positive integer' });
-    if (position.quantity < quantity) return res.status(400).json({ success: false, message: 'Insufficient shares to sell' });
     const total = stock.price * quantity;
-    const realizedPnL = (stock.price - position.avgPrice) * quantity;
-    position.quantity -= quantity;
+    let realizedPnL = 0;
+    if (!position) {
+      req.user.portfolio.push({ symbol, quantity: -quantity, avgPrice: stock.price });
+    } else if (position.quantity > 0) {
+      const closedQuantity = Math.min(quantity, position.quantity);
+      realizedPnL = (stock.price - position.avgPrice) * closedQuantity;
+      position.quantity -= closedQuantity;
+      const shortQuantity = quantity - closedQuantity;
+      if (position.quantity === 0) req.user.portfolio = req.user.portfolio.filter((item) => item.symbol !== symbol);
+      if (shortQuantity > 0) req.user.portfolio.push({ symbol, quantity: -shortQuantity, avgPrice: stock.price });
+    } else {
+      const existingShortQuantity = Math.abs(position.quantity);
+      position.avgPrice = ((position.avgPrice * existingShortQuantity) + total) / (existingShortQuantity + quantity);
+      position.quantity -= quantity;
+    }
     req.user.balance += total;
     req.user.totalPnL += realizedPnL;
     req.user.trades += 1;
     if (realizedPnL > 0) req.user.winningTrades += 1;
-    if (position.quantity === 0) req.user.portfolio = req.user.portfolio.filter((item) => item.symbol !== symbol);
+    req.user.totalPnL += realizedPnL;
     await req.user.save();
     await Trade.create({ user: req.user._id, symbol, type: 'SELL', quantity, price: stock.price, total, realizedPnL });
     res.json({ success: true, message: 'Stock sold successfully', user: req.user, trade: { symbol, quantity, price: stock.price, type: 'SELL', realizedPnL } });
@@ -95,7 +117,9 @@ export const getPortfolio = async (req, res, next) => {
     const portfolio = req.user.portfolio.map((position) => {
       const stock = prices.find((item) => item.symbol === position.symbol);
       const currentPrice = stock?.price || position.avgPrice;
-      return { ...position.toObject(), currentPrice, pnl: (currentPrice - position.avgPrice) * position.quantity };
+      const isShort = position.quantity < 0;
+      const quantity = Math.abs(position.quantity);
+      return { ...position.toObject(), quantity, side: isShort ? 'SHORT' : 'LONG', currentPrice, pnl: (isShort ? position.avgPrice - currentPrice : currentPrice - position.avgPrice) * quantity };
     });
     res.json({ success: true, portfolio });
   } catch (error) { next(error); }

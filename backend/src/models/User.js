@@ -4,7 +4,7 @@ import { STARTING_BALANCE } from '../config/constants.js';
 
 const positionSchema = new mongoose.Schema({
   symbol: { type: String, required: true, uppercase: true },
-  quantity: { type: Number, required: true, min: 0 },
+  quantity: { type: Number, required: true },
   avgPrice: { type: Number, required: true, min: 0 },
 }, { _id: false });
 
