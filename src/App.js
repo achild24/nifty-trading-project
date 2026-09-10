@@ -18,6 +18,12 @@ function AppContent() {
   const [totalHoldingQuantity, setTotalHoldingQuantity] = useState(0);
   const [totalPnL, setTotalPnL] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDarkMode);
+    localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+  }, [isDarkMode]);
 
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -113,6 +119,9 @@ function AppContent() {
         user={user}
         portfolioValue={portfolioValue}
         totalPnL={totalPnL}
+        totalHoldingQuantity={totalHoldingQuantity}
+        isDarkMode={isDarkMode}
+        onToggleTheme={() => setIsDarkMode((current) => !current)}
         onLogout={handleLogout}
         onNavigate={setActiveTab}
       />
