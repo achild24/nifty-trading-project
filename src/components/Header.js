@@ -21,9 +21,9 @@ export const Header = ({ user, portfolioValue, totalPnL, totalHoldingQuantity, i
               <button type="button" onClick={onToggleTheme} aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'} className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">
                 {isDarkMode ? <Sun size={19} /> : <Moon size={19} />}
               </button>
-              <div className="rounded-lg bg-emerald-50 px-3 py-2 text-right sm:px-4">
-                <p className="text-xs text-slate-500">Balance</p>
-                <p className="font-bold text-emerald-700">₹{Number(user?.balance || 0).toLocaleString()}</p>
+              <div className="rounded-lg border border-slate-200 px-3 py-2 text-right sm:px-4 dark:border-slate-700">
+                <p className="text-xs text-slate-700 dark:text-white">Balance</p>
+                <p className="font-bold text-black dark:text-white">₹{Number(user?.balance || 0).toLocaleString()}</p>
               </div>
               <div className="relative hidden sm:block">
               <button type="button" onClick={() => setShowAccountMenu((visible) => !visible)} aria-label="Open My Account menu" className="flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
